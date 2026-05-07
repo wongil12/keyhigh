@@ -5,10 +5,8 @@ import Combine
 final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var panel: CharacterPanel?
-    private var tracker: TypingSpeedTracker?
     private var selection: CharacterSelectionModel?
     private var sizeModel: SizeSelectionModel?
-    private var monitor: TypingMonitor?
     private var cancellables: Set<AnyCancellable> = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -17,17 +15,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let library = VideoLoader.loadLibrary()
         if library.isEmpty {
-            fputs("KeyHigh: no <name>_idle.* / <name>_run.* video pairs found in Resources — placeholder will show.\n", stderr)
+            fputs("KeyHigh: no <name>_idle.* videos found in Resources — placeholder will show.\n", stderr)
         }
 
-        let tracker = TypingSpeedTracker()
         let selection = CharacterSelectionModel(library: library, defaultID: "mouse")
         let sizeModel = SizeSelectionModel(defaultSize: .small)
-        self.tracker = tracker
         self.selection = selection
         self.sizeModel = sizeModel
 
-        let view = CharacterView(tracker: tracker, selection: selection, sizeModel: sizeModel)
+        let view = CharacterView(selection: selection, sizeModel: sizeModel)
         let host = NSHostingView(rootView: view)
         host.frame = NSRect(origin: .zero, size: sizeModel.current.nsSize)
         host.autoresizingMask = [.width, .height]
@@ -45,14 +41,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 panel?.applySize(newSize.nsSize)
             }
             .store(in: &cancellables)
-
-        let monitor = TypingMonitor(tracker: tracker)
-        monitor.start()
-        self.monitor = monitor
-    }
-
-    func applicationWillTerminate(_ notification: Notification) {
-        monitor?.stop()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
