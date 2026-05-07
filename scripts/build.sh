@@ -3,6 +3,11 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+# Use Xcode toolchain if available (CommandLineTools often has mismatched SDK).
+if [[ -d /Applications/Xcode.app ]]; then
+    export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+fi
+
 CONFIG="${CONFIG:-release}"
 APP_NAME="KeyHigh"
 APP=".build/${APP_NAME}.app"
@@ -25,12 +30,16 @@ rm -rf "${APP}"
 mkdir -p "${APP}/Contents/MacOS" "${APP}/Contents/Resources"
 cp "${BIN_PATH}" "${APP}/Contents/MacOS/${APP_NAME}"
 cp App/Info.plist "${APP}/Contents/Info.plist"
-if [[ -d Resources ]]; then
-    find Resources -mindepth 1 -maxdepth 1 -exec cp -R {} "${APP}/Contents/Resources/" \; 2>/dev/null || true
+RESOURCES_DIR="Sources/KeyHigh/Resources"
+if [[ -d "${RESOURCES_DIR}" ]]; then
+    find "${RESOURCES_DIR}" -mindepth 1 -maxdepth 1 -exec cp -R {} "${APP}/Contents/Resources/" \; 2>/dev/null || true
 fi
 if [[ -f App/AppIcon.icns ]]; then
     cp App/AppIcon.icns "${APP}/Contents/Resources/AppIcon.icns"
 fi
+
+# Strip resource forks / extended attrs that break codesign.
+xattr -cr "${APP}"
 
 echo "==> codesign as ${SIGNING_IDENTITY}"
 # Hardened Runtime (--options runtime) and a secure timestamp are required for

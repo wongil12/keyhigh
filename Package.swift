@@ -9,7 +9,10 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "KeyHigh",
-            path: "Sources/KeyHigh"
+            path: "Sources/KeyHigh",
+            resources: [
+                .copy("Resources")
+            ]
         )
     ]
 )
