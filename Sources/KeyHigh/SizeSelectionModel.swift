@@ -22,10 +22,11 @@ final class SizeSelectionModel: ObservableObject {
 
     @Published private(set) var current: CharacterSize
 
-    private let defaultsKey = "characterSize"
+    private let defaultsKey: String
 
-    init(defaultSize: CharacterSize = .small) {
-        let saved = (UserDefaults.standard.object(forKey: "characterSize") as? Int)
+    init(defaultSize: CharacterSize = .small, defaultsKey: String = "characterSize") {
+        self.defaultsKey = defaultsKey
+        let saved = (UserDefaults.standard.object(forKey: defaultsKey) as? Int)
             .flatMap(CharacterSize.init(rawValue:))
         self.current = saved ?? defaultSize
     }

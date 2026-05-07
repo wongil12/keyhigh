@@ -13,7 +13,7 @@ APP_NAME="KeyHigh"
 APP=".build/${APP_NAME}.app"
 
 # Override with `KEYHIGH_SIGNING_IDENTITY=- ./scripts/build.sh` for ad-hoc.
-SIGNING_IDENTITY="${KEYHIGH_SIGNING_IDENTITY:-Developer ID Application: Jahyeon Ko (RP5GZ99V95)}"
+SIGNING_IDENTITY="${KEYHIGH_SIGNING_IDENTITY:--}"
 ENTITLEMENTS="App/KeyHigh.entitlements"
 
 echo "==> swift build -c ${CONFIG}"

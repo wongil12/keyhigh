@@ -2,9 +2,10 @@ import AppKit
 
 final class CharacterPanel: NSPanel {
 
-    private static let originDefaultsKey = "characterOrigin"
+    let originDefaultsKey: String
 
-    init(initialSize: NSSize) {
+    init(initialSize: NSSize, persistenceKey: String = "characterOrigin") {
+        self.originDefaultsKey = persistenceKey
         let initialFrame = NSRect(origin: .zero, size: initialSize)
         super.init(
             contentRect: initialFrame,
@@ -30,7 +31,7 @@ final class CharacterPanel: NSPanel {
         ]
         animationBehavior = .none
 
-        let origin = Self.loadSavedOrigin(forSize: initialSize)
+        let origin = loadSavedOrigin(forSize: initialSize)
             ?? Self.defaultOrigin(forSize: initialSize)
         setFrameOrigin(origin)
 
@@ -58,27 +59,27 @@ final class CharacterPanel: NSPanel {
     }
 
     @objc private func handleDidMove(_ notification: Notification) {
-        Self.saveOrigin(frame.origin)
+        saveOrigin(frame.origin)
     }
 
     // MARK: - Origin persistence
 
-    private static func loadSavedOrigin(forSize size: NSSize) -> NSPoint? {
+    private func loadSavedOrigin(forSize size: NSSize) -> NSPoint? {
         let defaults = UserDefaults.standard
         guard let dict = defaults.dictionary(forKey: originDefaultsKey),
               let x = dict["x"] as? Double,
               let y = dict["y"] as? Double
         else { return nil }
         let candidate = NSRect(origin: NSPoint(x: x, y: y), size: size)
-        return clamp(frame: candidate).origin
+        return Self.clamp(frame: candidate).origin
     }
 
-    private static func saveOrigin(_ point: NSPoint) {
+    private func saveOrigin(_ point: NSPoint) {
         let defaults = UserDefaults.standard
         defaults.set(["x": Double(point.x), "y": Double(point.y)], forKey: originDefaultsKey)
     }
 
-    private static func defaultOrigin(forSize size: NSSize) -> NSPoint {
+    static func defaultOrigin(forSize size: NSSize) -> NSPoint {
         guard let screen = NSScreen.main else { return .zero }
         let visible = screen.visibleFrame
         let margin: CGFloat = 24
@@ -90,7 +91,7 @@ final class CharacterPanel: NSPanel {
 
     /// Keep the supplied frame inside some visible screen. If it doesn't
     /// intersect any, fall back to the default bottom-right placement.
-    private static func clamp(frame: NSRect) -> NSRect {
+    static func clamp(frame: NSRect) -> NSRect {
         let screens = NSScreen.screens
         if screens.contains(where: { $0.visibleFrame.intersects(frame) }) {
             return frame

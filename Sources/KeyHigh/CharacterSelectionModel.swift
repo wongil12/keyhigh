@@ -10,9 +10,10 @@ final class CharacterSelectionModel: ObservableObject {
     @Published private(set) var current: CharacterAssets?
 
     let library: [CharacterAssets]
-    private let defaultsKey = "selectedCharacter"
+    private let defaultsKey: String
 
-    init(library: [CharacterAssets], defaultID: String = "mouse") {
+    init(library: [CharacterAssets], defaultID: String = "mouse", defaultsKey: String = "selectedCharacter") {
+        self.defaultsKey = defaultsKey
         self.library = library
         let savedID = UserDefaults.standard.string(forKey: defaultsKey)
         let chosen = library.first(where: { $0.id == savedID })

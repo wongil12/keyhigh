@@ -5,6 +5,10 @@ struct CharacterView: View {
     @ObservedObject var selection: CharacterSelectionModel
     @ObservedObject var sizeModel: SizeSelectionModel
 
+    var onNewWindow: (() -> Void)?
+    var onCloseWindow: (() -> Void)?
+    var canClose: Bool = false
+
     private var currentURL: URL? {
         selection.current?.idleURL
     }
@@ -28,6 +32,10 @@ struct CharacterView: View {
 
     @ViewBuilder
     private var menu: some View {
+        Button("New Window") {
+            onNewWindow?()
+        }
+
         if !selection.library.isEmpty {
             Section("Character") {
                 ForEach(selection.library) { character in
@@ -57,6 +65,10 @@ struct CharacterView: View {
             }
         }
         Divider()
+        Button("Close Window") {
+            onCloseWindow?()
+        }
+        .disabled(!canClose)
         Button("Quit KeyHigh") {
             NSApp.terminate(nil)
         }
